@@ -49,7 +49,6 @@ resource "aws_subnet" "myPubSN" {
 
 # 5. Public Routing Table 생성 & Public Subnet 연결
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association
 resource "aws_route_table" "myPubRT" {
   vpc_id = aws_vpc.myVPC.id
 
@@ -64,6 +63,7 @@ resource "aws_route_table" "myPubRT" {
   }
 }
 
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association
 resource "aws_route_table_association" "myPubRTassoc" {
   subnet_id      = aws_subnet.myPubSN.id
   route_table_id = aws_route_table.myPubRT.id
