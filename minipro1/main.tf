@@ -106,17 +106,19 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_egress_traffic" {
 # * Key Pair: myUSkeypair
 # * Security Group: allow_all_traffic
 data "aws_ami" "ubuntu2024ami" {
+   most_recent = true
+   
   filter {
     name   = "name"
     values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
   }
 
-#   filter {
-#     name   = "virtualization-type"
-#     values = ["hvm"]
-#   }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
 
-#   owners = ["099720109477"]
+  owners = ["099720109477"]
 }
 
 # KeyPair 생성
@@ -132,8 +134,24 @@ resource "aws_instance" "myEC2" {
   subnet_id              = aws_subnet.myPubSN.id
   key_name               = aws_key_pair.myDeveloperKey.key_name
 
+# user_data: docker 설치
+  user_data                   = file("user_data.tpl")
+  user_data_replace_on_change = true
+
+# Provisioners 설정
+  provisioner "local-exec" {
+  command        = templatefile("linux-ssh-config.tpl", {
+    hostname     = self.public_ip,
+    user         = "ubuntu",
+    identityfile = "~/.ssh/devkey"
+  })
+  interpreter    = ["bash", "-c"]
+  # interpreter  = ["Powershell", "-Command"]
+}
+
   tags = {
     Name = "myEC2"
   }
 }
+
 
